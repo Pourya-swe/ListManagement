@@ -1,13 +1,18 @@
 import { useForm } from "react-hook-form";
 import type { AddFormItemProps } from "../types/addFormItem.types";
-import type { ItemFormData } from "../types/item.types";
+import type { Item, ItemFormData } from "../types/item.types";
 import { useEffect } from "react";
-import Modal from "./Modal";
 import { addItem, updateItem } from "../store/itemSlice";
 import { useAppDispatch } from "../store/hooks";
+import Form from "./Form";
 
-function AddFormItem({ onClose, initialData }: AddFormItemProps) {
+function AddFormItem({
+  itemToEdit = {} as Item,
+  onCloseModal,
+}: AddFormItemProps) {
   const dispatch = useAppDispatch();
+
+  const isEditing = Boolean(itemToEdit.id);
 
   const {
     register,
@@ -16,8 +21,8 @@ function AddFormItem({ onClose, initialData }: AddFormItemProps) {
     reset,
     setFocus,
   } = useForm<ItemFormData>({
-    defaultValues: initialData
-      ? { title: initialData.title, subtitle: initialData.subtitle }
+    defaultValues: isEditing
+      ? { title: itemToEdit.title, subtitle: itemToEdit.subtitle }
       : { title: "", subtitle: "" },
   });
 
@@ -27,89 +32,87 @@ function AddFormItem({ onClose, initialData }: AddFormItemProps) {
 
   useEffect(() => {
     reset(
-      initialData
-        ? { title: initialData.title, subtitle: initialData.subtitle }
+      isEditing
+        ? { title: itemToEdit.title, subtitle: itemToEdit.subtitle }
         : { title: "", subtitle: "" }
     );
-  }, [initialData, reset]);
+  }, [isEditing, reset, itemToEdit.title, itemToEdit.subtitle]);
 
   const onSubmit = async (data: ItemFormData) => {
-    if (initialData) {
+    if (itemToEdit.id) {
       dispatch(
         updateItem({
-          id: initialData.id,
+          id: itemToEdit.id,
           changes: { title: data.title, subtitle: data.subtitle },
         })
       );
     } else {
       dispatch(addItem({ title: data.title, subtitle: data.subtitle }));
     }
-    onClose();
+    onCloseModal();
   };
 
   return (
-    <Modal onClose={onClose}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-5">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
-            {initialData ? "Edit Item" : "Create Item"}
-          </h2>
-        </div>
+    <Form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-5">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">
+          {isEditing ? "Edit Item" : "Create Item"}
+        </h2>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium">Title</label>
-          <input
-            {...register("title", {
-              required: "Title is required",
-              maxLength: { value: 100, message: "Max 100 chars" },
-            })}
-            placeholder="Add a title"
-            className="mt-1 block w-full h-12 border rounded px-3 py-2"
-            autoComplete="off"
-          />
-          {errors.title && (
-            <p id="title-error" className="text-sm text-red-600 mt-1">
-              {errors.title.message}
-            </p>
-          )}
-        </div>
+      <div>
+        <label className="block text-sm font-medium">Title</label>
+        <input
+          {...register("title", {
+            required: "Title is required",
+            maxLength: { value: 100, message: "Max 100 chars" },
+          })}
+          placeholder="Add a title"
+          className="mt-1 block w-full h-12 border rounded px-3 py-2"
+          autoComplete="off"
+        />
+        {errors.title && (
+          <p id="title-error" className="text-sm text-red-600 mt-1">
+            {errors.title.message}
+          </p>
+        )}
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium">Subtitle</label>
-          <textarea
-            {...register("subtitle", {
-              required: "Subtitle is required",
-              maxLength: { value: 200, message: "Max 300 chars" },
-            })}
-            placeholder="Add a subtitle"
-            className="mt-1 block w-full border rounded px-3 py-2 resize-none"
-            autoComplete="off"
-          />
-          {errors.subtitle && (
-            <p id="subtitle-error" className="text-sm text-red-600 mt-1">
-              {errors.subtitle.message}
-            </p>
-          )}
-        </div>
+      <div>
+        <label className="block text-sm font-medium">Subtitle</label>
+        <textarea
+          {...register("subtitle", {
+            required: "Subtitle is required",
+            maxLength: { value: 200, message: "Max 300 chars" },
+          })}
+          placeholder="Add a subtitle"
+          className="mt-1 block w-full border rounded px-3 py-2 resize-none"
+          autoComplete="off"
+        />
+        {errors.subtitle && (
+          <p id="subtitle-error" className="text-sm text-red-600 mt-1">
+            {errors.subtitle.message}
+          </p>
+        )}
+      </div>
 
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 border rounded"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-sky-600 text-white rounded"
-          >
-            {initialData ? "Save" : "Create"}
-          </button>
-        </div>
-      </form>
-    </Modal>
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onCloseModal}
+          className="px-4 py-2 border rounded"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 bg-sky-600 text-white rounded"
+        >
+          {isEditing ? "Save" : "Create"}
+        </button>
+      </div>
+    </Form>
   );
 }
 

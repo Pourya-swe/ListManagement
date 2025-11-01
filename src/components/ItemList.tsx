@@ -1,4 +1,3 @@
-import type { Item } from "../types/item.types";
 import ItemCard from "./ItemCard";
 import { useAppSelector } from "../store/hooks";
 import {
@@ -6,7 +5,7 @@ import {
   selectIsSearching,
 } from "../store/itemsSelectors";
 
-function ItemList({ onEdit }: { onEdit: (item: Item) => void }) {
+function ItemList() {
   const items = useAppSelector(selectFilteredItems);
   const isSearching = useAppSelector(selectIsSearching);
 
@@ -25,7 +24,7 @@ function ItemList({ onEdit }: { onEdit: (item: Item) => void }) {
   return (
     <section className="min-h-dvh bg-blue-300 flex flex-col gap-4 px-5 py-10 md:px-20 ">
       {items.map((i) => (
-        <ItemCard key={i.id} item={i} onEdit={onEdit} />
+        <ItemCard key={i.id} item={i} />
       ))}
     </section>
   );

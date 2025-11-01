@@ -4,8 +4,10 @@ import { deleteItem } from "../store/itemSlice";
 import ConfirmDialog from "./ConfirmDialog";
 import { useAppDispatch } from "../store/hooks";
 import type { ItemCardProps } from "../types/itemCard.types";
+import Modal from "./Modal";
+import AddFormItem from "./AddFormItem";
 
-function ItemCard({ item, onEdit }: ItemCardProps) {
+function ItemCard({ item }: ItemCardProps) {
   const dispatch = useAppDispatch();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -36,13 +38,16 @@ function ItemCard({ item, onEdit }: ItemCardProps) {
           >
             Delete
           </Button>
-          <Button
-            onClick={() => onEdit(item)}
-            className="w-full"
-            variant="secondary"
-          >
-            Edit
-          </Button>
+          <Modal>
+            <Modal.Open opens="edit-item-modal">
+              <Button className="w-full" variant="secondary">
+                Edit
+              </Button>
+            </Modal.Open>
+            <Modal.Window name="edit-item-modal">
+              <AddFormItem itemToEdit={item} onCloseModal={() => {}} />
+            </Modal.Window>
+          </Modal>
         </div>
       </div>
       {confirmOpen && (
