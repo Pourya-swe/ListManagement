@@ -35,7 +35,11 @@ const slice = createSlice({
     ) {
       const idx = state.items.findIndex((i) => i.id === action.payload.id);
       if (idx !== -1) {
-        state.items[idx] = { ...state.items[idx], ...action.payload.changes };
+        state.items[idx] = {
+          ...state.items[idx],
+          ...action.payload.changes,
+          createdAt: new Date().toISOString(),
+        };
         saveToLocalStorage(state.items);
       }
     },
